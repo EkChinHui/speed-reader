@@ -150,7 +150,7 @@
 			</div>
 		{:else if isFinished}
 			<div class="finished-display">
-				<div class="word-display" style="font-family: var(--font-family)">Done</div>
+				<div class="word-display finished-word" style="font-family: var(--font-family)">Done</div>
 				<p class="finished-subtitle">Press Space to restart or Esc to go back</p>
 			</div>
 		{/if}
@@ -270,6 +270,12 @@
 		width: 100vw;
 		max-width: 100vw;
 		overflow: hidden;
+		animation: wordFadeIn 200ms ease both;
+	}
+
+	@keyframes wordFadeIn {
+		from { opacity: 0; }
+		to { opacity: 1; }
 	}
 
 	.word-display {
@@ -309,6 +315,29 @@
 	/* Finished */
 	.finished-display {
 		text-align: center;
+		animation: finishedEntrance 400ms ease-out both;
+	}
+
+	.finished-word {
+		display: block !important;
+		text-align: center;
+		animation: finishedGlow 600ms ease-out 400ms both;
+	}
+
+	@keyframes finishedEntrance {
+		from {
+			opacity: 0;
+			transform: scale(0.9);
+		}
+		to {
+			opacity: 1;
+			transform: scale(1);
+		}
+	}
+
+	@keyframes finishedGlow {
+		0% { text-shadow: 0 0 20px var(--accent-glow); }
+		100% { text-shadow: none; }
 	}
 
 	.finished-subtitle {
@@ -324,7 +353,7 @@
 		text-align: center;
 		font-size: 1rem;
 		line-height: 1.8;
-		animation: fadeIn 0.3s ease;
+		animation: fadeInSharp 0.3s ease;
 	}
 
 	.context-before,
@@ -338,14 +367,16 @@
 		font-weight: 600;
 	}
 
-	@keyframes fadeIn {
+	@keyframes fadeInSharp {
 		from {
 			opacity: 0;
 			transform: translateY(8px);
+			filter: blur(2px);
 		}
 		to {
 			opacity: 1;
 			transform: translateY(0);
+			filter: blur(0);
 		}
 	}
 
