@@ -14,7 +14,9 @@
 	} from '$lib/engine/text-processor';
 
 	let textareaEl: HTMLTextAreaElement | undefined = $state();
+	let zenTextareaEl: HTMLTextAreaElement | undefined = $state();
 	let showInfo = $state(false);
+	let zenMode = $state(false);
 
 	let cleaned = $derived(cleanText(appState.rawText));
 	let words = $derived(wordCount(cleaned));
@@ -27,8 +29,34 @@
 		appState.startReading();
 	}
 
+	function openZen() {
+		zenMode = true;
+	}
+
+	function closeZen() {
+		zenMode = false;
+	}
+
+	function handleZenKeydown(e: KeyboardEvent) {
+		if (e.key === 'Escape') {
+			e.preventDefault();
+			closeZen();
+		}
+	}
+
 	$effect(() => {
-		textareaEl?.focus();
+		if (zenMode && zenTextareaEl) {
+			zenTextareaEl.focus();
+			// Move cursor to end
+			zenTextareaEl.selectionStart = zenTextareaEl.value.length;
+			zenTextareaEl.selectionEnd = zenTextareaEl.value.length;
+		}
+	});
+
+	$effect(() => {
+		if (!zenMode) {
+			textareaEl?.focus();
+		}
 	});
 </script>
 
@@ -137,19 +165,52 @@
 		></textarea>
 
 		{#if hasText}
-			<div class="stats-line">
-				<span>{words} words</span>
-				<span class="stats-dot"></span>
-				<span>{chars} chars</span>
-				<span class="stats-dot"></span>
-				<span>{formatTime(readTime)}</span>
-				{#if saved > 0}
+			<div class="input-meta">
+				<div class="stats-line">
+					<span>{words} words</span>
 					<span class="stats-dot"></span>
-					<span class="stats-highlight">{formatTime(saved)} saved</span>
-				{/if}
+					<span>{chars} chars</span>
+					<span class="stats-dot"></span>
+					<span>{formatTime(readTime)}</span>
+					{#if saved > 0}
+						<span class="stats-dot"></span>
+						<span class="stats-highlight">{formatTime(saved)} saved</span>
+					{/if}
+				</div>
+				<button class="edit-toggle" onclick={openZen}>
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<polyline points="15 3 21 3 21 9"/>
+						<polyline points="9 21 3 21 3 15"/>
+						<line x1="21" y1="3" x2="14" y2="10"/>
+						<line x1="3" y1="21" x2="10" y2="14"/>
+					</svg>
+					edit
+				</button>
 			</div>
 		{/if}
 	</div>
+
+	{#if zenMode}
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<div class="zen-overlay" onkeydown={handleZenKeydown}>
+			<div class="zen-topbar">
+				<button class="zen-close" onclick={closeZen}>
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<line x1="18" y1="6" x2="6" y2="18"/>
+						<line x1="6" y1="6" x2="18" y2="18"/>
+					</svg>
+					esc
+				</button>
+				<span class="zen-stats">{words.toLocaleString()} words · {chars.toLocaleString()} chars</span>
+			</div>
+			<textarea
+				bind:this={zenTextareaEl}
+				bind:value={appState.rawText}
+				class="zen-textarea"
+				placeholder="Paste or type your text..."
+			></textarea>
+		</div>
+	{/if}
 
 	<div class="bottom-section">
 		<button class="start-btn" disabled={!hasText} onclick={startReading}>
@@ -382,9 +443,9 @@
 		color: var(--text-primary);
 		font-size: 0.95rem;
 		font-family: inherit;
-		resize: vertical;
+		resize: none;
 		min-height: 120px;
-		transition: border-color 0.2s, box-shadow 0.2s, background-color 200ms, color 200ms;
+		transition: border-color 0.2s, box-shadow 0.2s, background-color 200ms, color 200ms, min-height 350ms ease;
 		outline: none;
 		box-sizing: border-box;
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), inset 0 1px 2px rgba(0, 0, 0, 0.04);
@@ -396,6 +457,106 @@
 	}
 
 	.text-input::placeholder {
+		color: var(--text-muted);
+	}
+
+	.input-meta {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.5rem;
+	}
+
+	.edit-toggle {
+		display: flex;
+		align-items: center;
+		gap: 0.3rem;
+		background: none;
+		border: none;
+		color: var(--text-muted);
+		font-size: 0.75rem;
+		cursor: pointer;
+		padding: 0.2rem 0.4rem;
+		border-radius: 4px;
+		transition: color 0.15s;
+		flex-shrink: 0;
+	}
+
+	.edit-toggle:hover {
+		color: var(--text-secondary);
+	}
+
+	/* Zen mode overlay */
+	.zen-overlay {
+		position: fixed;
+		inset: 0;
+		background: var(--bg);
+		z-index: 50;
+		display: flex;
+		flex-direction: column;
+		padding: 1.5rem;
+		animation: zenFadeIn 300ms ease both;
+	}
+
+	@keyframes zenFadeIn {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+
+	.zen-topbar {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 1rem;
+		flex-shrink: 0;
+	}
+
+	.zen-close {
+		display: flex;
+		align-items: center;
+		gap: 0.35rem;
+		background: none;
+		border: 1px solid var(--border);
+		color: var(--text-muted);
+		font-size: 0.75rem;
+		cursor: pointer;
+		padding: 0.3rem 0.6rem;
+		border-radius: 6px;
+		transition: color 0.15s, border-color 0.15s;
+	}
+
+	.zen-close:hover {
+		color: var(--text-secondary);
+		border-color: var(--border-hover);
+	}
+
+	.zen-stats {
+		font-size: 0.75rem;
+		color: var(--text-muted);
+		font-variant-numeric: tabular-nums;
+	}
+
+	.zen-textarea {
+		flex: 1;
+		width: 100%;
+		max-width: 700px;
+		margin: 0 auto;
+		background: transparent;
+		border: none;
+		outline: none;
+		color: var(--text-primary);
+		font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace;
+		font-size: 0.9rem;
+		line-height: 1.8;
+		resize: none;
+		caret-color: var(--accent);
+	}
+
+	.zen-textarea::placeholder {
 		color: var(--text-muted);
 	}
 
