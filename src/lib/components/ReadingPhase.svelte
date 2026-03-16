@@ -374,7 +374,9 @@
 		height: 40px;
 		border-radius: 50%;
 		border: 1px solid var(--border);
-		background: var(--surface);
+		background: color-mix(in srgb, var(--surface) 80%, transparent);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
 		color: var(--text-secondary);
 		cursor: pointer;
 		display: flex;
@@ -384,8 +386,9 @@
 	}
 
 	.back-btn:hover {
-		border-color: var(--text-secondary);
+		border-color: var(--border-hover);
 		color: var(--text-primary);
+		transform: scale(1.05);
 	}
 
 	.center-controls {
@@ -400,17 +403,19 @@
 		border-radius: 50%;
 		border: none;
 		background: var(--accent);
-		color: var(--bg);
+		color: white;
 		cursor: pointer;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		transition: all 0.15s;
+		box-shadow: 0 0 16px var(--accent-glow);
 	}
 
 	.play-btn:hover {
 		filter: brightness(1.15);
 		transform: scale(1.05);
+		box-shadow: 0 0 24px var(--accent-glow);
 	}
 
 	.speed-display {
@@ -432,7 +437,9 @@
 		height: 30px;
 		border-radius: 50%;
 		border: 1px solid var(--border);
-		background: transparent;
+		background: color-mix(in srgb, var(--surface) 80%, transparent);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
 		color: var(--text-secondary);
 		cursor: pointer;
 		display: flex;
@@ -443,7 +450,8 @@
 	}
 
 	.speed-nudge:hover {
-		border-color: var(--text-secondary);
+		border-color: var(--border-hover);
 		color: var(--text-primary);
+		transform: scale(1.05);
 	}
 </style>
