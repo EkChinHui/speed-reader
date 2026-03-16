@@ -133,7 +133,7 @@
 	</div>
 
 	<!-- ORP center guide line -->
-	<div class="orp-center-line"></div>
+	<div class="orp-center-line" class:pulsing={isIdle}></div>
 
 	<!-- Main word display -->
 	<div class="word-container">
@@ -223,7 +223,7 @@
 		top: 0;
 		left: 0;
 		right: 0;
-		height: 3px;
+		height: 4px;
 		background: var(--surface);
 	}
 
@@ -231,6 +231,7 @@
 		height: 100%;
 		background: var(--accent);
 		transition: width 0.1s linear;
+		box-shadow: 0 0 8px var(--accent-glow);
 	}
 
 	/* ORP center guide */
@@ -244,6 +245,15 @@
 		opacity: 0.3;
 		border-radius: 1px;
 		transform: translateX(-50%);
+	}
+
+	.orp-center-line.pulsing {
+		animation: orpPulse 2s ease-in-out infinite;
+	}
+
+	@keyframes orpPulse {
+		0%, 100% { opacity: 0.2; }
+		50% { opacity: 0.4; }
 	}
 
 	/* Word display */
