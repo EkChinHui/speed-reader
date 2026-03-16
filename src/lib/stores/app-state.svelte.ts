@@ -20,6 +20,7 @@ interface PersistedSettings {
 	wpm: number;
 	font: FontFamily;
 	theme: 'light' | 'dark';
+	rawText: string;
 }
 
 function resolveSystemTheme(): Theme {
@@ -41,13 +42,14 @@ function loadSettings(): PersistedSettings {
 			return {
 				wpm: typeof parsed.wpm === 'number' ? parsed.wpm : DEFAULT_WPM,
 				font: FONT_OPTIONS.some((o) => o.value === parsed.font) ? parsed.font : 'Inter',
-				theme: validThemes.includes(parsed.theme) ? parsed.theme : resolveSystemTheme()
+				theme: validThemes.includes(parsed.theme) ? parsed.theme : resolveSystemTheme(),
+				rawText: typeof parsed.rawText === 'string' ? parsed.rawText : ''
 			};
 		}
 	} catch {
 		// ignore
 	}
-	return { wpm: DEFAULT_WPM, font: 'Inter', theme: resolveSystemTheme() };
+	return { wpm: DEFAULT_WPM, font: 'Inter', theme: resolveSystemTheme(), rawText: '' };
 }
 
 function saveSettings(settings: PersistedSettings) {
@@ -70,10 +72,11 @@ class AppState {
 		this.wpm = saved.wpm;
 		this.font = saved.font;
 		this.theme = saved.theme;
+		this.rawText = saved.rawText;
 
 		$effect.root(() => {
 			$effect(() => {
-				saveSettings({ wpm: this.wpm, font: this.font, theme: this.theme });
+				saveSettings({ wpm: this.wpm, font: this.font, theme: this.theme, rawText: this.rawText });
 			});
 			$effect(() => {
 				if (typeof document !== 'undefined') {

@@ -2,10 +2,7 @@
 	import {
 		appState,
 		FONT_OPTIONS,
-		SPEED_PRESETS,
-		WPM_STEP,
-		WPM_MIN,
-		WPM_MAX
+		SPEED_PRESETS
 	} from '$lib/stores/app-state.svelte';
 	import {
 		cleanText,
@@ -30,10 +27,6 @@
 		e.preventDefault();
 		const pasted = e.clipboardData?.getData('text/plain') ?? '';
 		appState.rawText = pasted;
-	}
-
-	function nudgeWPM(delta: number) {
-		appState.wpm = Math.max(WPM_MIN, Math.min(WPM_MAX, appState.wpm + delta));
 	}
 
 	function startReading() {
@@ -76,36 +69,72 @@
 	</div>
 
 	<div class="info-section">
-		<button class="info-toggle" onclick={() => showInfo = !showInfo}>
+		<button class="info-toggle" onclick={() => showInfo = true}>
 			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 				<circle cx="12" cy="12" r="10"/>
 				<line x1="12" y1="16" x2="12" y2="12"/>
 				<line x1="12" y1="8" x2="12.01" y2="8"/>
 			</svg>
 			How it works
-			<svg class="info-chevron" class:open={showInfo} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				<polyline points="6 9 12 15 18 9"/>
-			</svg>
 		</button>
-		{#if showInfo}
-			<div class="info-content">
-				<p>This app uses <strong>RSVP</strong> (Rapid Serial Visual Presentation) to help you read faster. Instead of scanning lines of text, words are shown one at a time at a fixed point — eliminating eye movement and letting you focus purely on comprehension.</p>
-				<div class="info-features">
-					<div class="info-feature">
-						<span class="info-feature-title">ORP alignment</span>
-						<span class="info-feature-desc">Each word is positioned at its Optimal Recognition Point — the character your eye naturally fixates on first</span>
-					</div>
-					<div class="info-feature">
-						<span class="info-feature-title">Smart pacing</span>
-						<span class="info-feature-desc">Longer words and punctuation get extra display time so you never feel rushed</span>
-					</div>
-					<div class="info-feature">
-						<span class="info-feature-title">Keyboard controls</span>
-						<span class="info-feature-desc">Space to pause, arrows to adjust speed, Esc to exit</span>
+	</div>
+
+	{#if showInfo}
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<div class="modal-backdrop" onclick={(e) => { if (e.target === e.currentTarget) showInfo = false; }} onkeydown={(e) => { if (e.key === 'Escape') showInfo = false; }}>
+			<div class="modal" role="dialog" aria-label="How it works">
+				<div class="modal-header">
+					<h2 class="modal-title">How it works</h2>
+					<button class="modal-close" onclick={() => showInfo = false} aria-label="Close">
+						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<line x1="18" y1="6" x2="6" y2="18"/>
+							<line x1="6" y1="6" x2="18" y2="18"/>
+						</svg>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p>This app uses <strong>RSVP</strong> (Rapid Serial Visual Presentation) to help you read faster. Instead of scanning lines of text, words are shown one at a time at a fixed point — eliminating eye movement and letting you focus purely on comprehension.</p>
+					<div class="info-features">
+						<div class="info-feature">
+							<span class="info-feature-title">ORP alignment</span>
+							<span class="info-feature-desc">Each word is positioned at its Optimal Recognition Point — the character your eye naturally fixates on first</span>
+						</div>
+						<div class="info-feature">
+							<span class="info-feature-title">Smart pacing</span>
+							<span class="info-feature-desc">Longer words and punctuation get extra display time so you never feel rushed</span>
+						</div>
+						<div class="info-feature">
+							<span class="info-feature-title">Keyboard controls</span>
+							<span class="info-feature-desc">Space to pause, arrows to adjust speed, Esc to exit</span>
+						</div>
 					</div>
 				</div>
 			</div>
-		{/if}
+		</div>
+	{/if}
+
+	<div class="config-bar">
+		<span class="config-bar-label">wpm</span>
+		{#each SPEED_PRESETS as preset}
+			<button
+				class="config-opt"
+				class:active={appState.wpm === preset}
+				onclick={() => (appState.wpm = preset)}
+			>
+				{preset}
+			</button>
+		{/each}
+		<span class="config-sep"></span>
+		<span class="config-bar-label">font</span>
+		{#each FONT_OPTIONS as opt}
+			<button
+				class="config-opt"
+				class:active={appState.font === opt.value}
+				onclick={() => (appState.font = opt.value)}
+			>
+				{opt.label.toLowerCase()}
+			</button>
+		{/each}
 	</div>
 
 	<div class="input-section">
@@ -138,49 +167,6 @@
 				</div>
 			</div>
 		{/if}
-	</div>
-
-	<div class="config-section">
-		<div class="speed-control">
-			<label class="config-label">Speed</label>
-			<div class="speed-row">
-				<button class="nudge-btn" onclick={() => nudgeWPM(-WPM_STEP)}>−</button>
-				<span class="wpm-display">{appState.wpm} <small>WPM</small></span>
-				<button class="nudge-btn" onclick={() => nudgeWPM(WPM_STEP)}>+</button>
-			</div>
-			<div class="speed-presets">
-				{#each SPEED_PRESETS as preset}
-					<button
-						class="preset-btn"
-						class:active={appState.wpm === preset}
-						onclick={() => (appState.wpm = preset)}
-					>
-						{preset}
-					</button>
-				{/each}
-			</div>
-		</div>
-
-		<div class="font-control">
-			<label class="config-label">Font</label>
-			<div class="font-options">
-				{#each FONT_OPTIONS as opt}
-					<button
-						class="font-btn"
-						class:active={appState.font === opt.value}
-						style="font-family: '{opt.value}', sans-serif"
-						onclick={() => (appState.font = opt.value)}
-					>
-						{#if appState.font === opt.value}
-							<svg class="check-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-								<polyline points="20 6 9 17 4 12"/>
-							</svg>
-						{/if}
-						{opt.label}
-					</button>
-				{/each}
-			</div>
-		</div>
 	</div>
 
 	<button class="start-btn" disabled={!hasText} onclick={startReading}>
@@ -229,29 +215,87 @@
 		color: var(--text-secondary);
 	}
 
-	.info-chevron {
-		transition: transform 0.2s ease;
+	.modal-backdrop {
+		position: fixed;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.5);
+		backdrop-filter: blur(4px);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 100;
+		animation: backdropFadeIn 200ms ease both;
+		padding: 1rem;
 	}
 
-	.info-chevron.open {
-		transform: rotate(180deg);
+	@keyframes backdropFadeIn {
+		from { opacity: 0; }
+		to { opacity: 1; }
 	}
 
-	.info-content {
-		margin-top: 0.75rem;
-		max-width: 520px;
-		animation: infoFadeIn 300ms ease both;
+	.modal {
+		background: var(--surface);
+		border: 1px solid var(--border);
+		border-radius: 16px;
+		max-width: 480px;
+		width: 100%;
+		padding: 1.5rem;
+		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+		animation: modalSlideIn 250ms ease both;
 	}
 
-	.info-content p {
+	@keyframes modalSlideIn {
+		from {
+			opacity: 0;
+			transform: scale(0.95) translateY(10px);
+		}
+		to {
+			opacity: 1;
+			transform: scale(1) translateY(0);
+		}
+	}
+
+	.modal-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 1rem;
+	}
+
+	.modal-title {
+		font-size: 1.1rem;
+		font-weight: 600;
+		color: var(--text-primary);
+		margin: 0;
+	}
+
+	.modal-close {
+		width: 32px;
+		height: 32px;
+		border-radius: 8px;
+		border: none;
+		background: transparent;
+		color: var(--text-muted);
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: color 0.15s, background 0.15s;
+	}
+
+	.modal-close:hover {
+		color: var(--text-primary);
+		background: var(--surface-raised);
+	}
+
+	.modal-body p {
 		color: var(--text-secondary);
 		font-size: 0.9rem;
 		line-height: 1.6;
-		text-align: center;
 		margin: 0 0 1rem;
 	}
 
-	.info-content strong {
+	.modal-body strong {
 		color: var(--accent);
 		font-weight: 600;
 	}
@@ -283,17 +327,6 @@
 		font-size: 0.85rem;
 		color: var(--text-secondary);
 		line-height: 1.4;
-	}
-
-	@keyframes infoFadeIn {
-		from {
-			opacity: 0;
-			transform: translateY(-4px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
 	}
 
 	.header-row {
@@ -439,144 +472,51 @@
 		}
 	}
 
-	.config-section {
+	.config-bar {
 		display: flex;
-		gap: 2rem;
+		align-items: center;
 		justify-content: center;
+		gap: 0.15rem;
+		padding: 0.4rem 0.6rem;
+		background: var(--surface-raised);
+		border-radius: 8px;
 		flex-wrap: wrap;
-		animation: configFadeIn 400ms ease both;
 	}
 
-	@keyframes configFadeIn {
-		from {
-			opacity: 0;
-			transform: translateY(8px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
+	.config-bar-label {
+		font-size: 0.65rem;
+		color: var(--text-muted);
+		text-transform: lowercase;
+		letter-spacing: 0.04em;
+		padding: 0 0.25rem;
+		user-select: none;
 	}
 
-	.config-label {
-		display: block;
+	.config-sep {
+		width: 1px;
+		height: 14px;
+		background: var(--border);
+		margin: 0 0.35rem;
+	}
+
+	.config-opt {
 		font-size: 0.8rem;
 		color: var(--text-muted);
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		margin-bottom: 0.5rem;
-		text-align: center;
-	}
-
-	.speed-row {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-		justify-content: center;
-	}
-
-	.wpm-display {
-		font-size: 1.5rem;
-		font-weight: 600;
-		color: var(--text-primary);
-		min-width: 100px;
-		text-align: center;
-	}
-
-	.wpm-display small {
-		font-size: 0.7em;
-		color: var(--text-muted);
-		font-weight: 400;
-	}
-
-	.nudge-btn {
-		width: 36px;
-		height: 36px;
-		border-radius: 50%;
-		border: 1px solid var(--border);
-		background: var(--surface);
-		color: var(--text-primary);
-		font-size: 1.2rem;
+		padding: 0.25rem 0.5rem;
+		border-radius: 4px;
 		cursor: pointer;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		transition: all 0.15s;
+		transition: color 0.15s;
+		border: none;
+		background: none;
+		font-family: inherit;
 	}
 
-	.nudge-btn:hover {
-		border-color: var(--accent);
+	.config-opt:hover {
+		color: var(--text-secondary);
+	}
+
+	.config-opt.active {
 		color: var(--accent);
-		transform: scale(1.05);
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-	}
-
-	.speed-presets {
-		display: flex;
-		gap: 0.4rem;
-		margin-top: 0.5rem;
-		justify-content: center;
-	}
-
-	.preset-btn {
-		padding: 0.3rem 0.6rem;
-		border: 1px solid var(--border);
-		border-radius: 8px;
-		background: transparent;
-		color: var(--text-secondary);
-		font-size: 0.8rem;
-		cursor: pointer;
-		transition: all 0.15s;
-	}
-
-	.preset-btn:hover {
-		border-color: var(--border-hover);
-		transform: scale(1.05);
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-	}
-
-	.preset-btn:active {
-		transform: scale(0.95);
-	}
-
-	.preset-btn.active {
-		background: var(--accent);
-		color: #1a1a1e;
-		border-color: var(--accent);
-	}
-
-	.font-options {
-		display: flex;
-		gap: 0.5rem;
-	}
-
-	.font-btn {
-		padding: 0.4rem 0.8rem;
-		border: 1px solid var(--border);
-		border-radius: 8px;
-		background: transparent;
-		color: var(--text-secondary);
-		font-size: 0.9rem;
-		cursor: pointer;
-		transition: all 0.15s;
-		display: flex;
-		align-items: center;
-		gap: 0.35rem;
-	}
-
-	.font-btn:hover {
-		border-color: var(--border-hover);
-		transform: scale(1.02);
-	}
-
-	.font-btn.active {
-		background: var(--accent);
-		color: #1a1a1e;
-		border-color: var(--accent);
-	}
-
-	.check-icon {
-		flex-shrink: 0;
 	}
 
 	.start-btn {
