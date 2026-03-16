@@ -164,6 +164,7 @@
 		gap: 2rem;
 		min-height: 100dvh;
 		justify-content: center;
+		transition: color 200ms;
 	}
 
 	.setup-header {
@@ -250,7 +251,7 @@
 		font-family: inherit;
 		resize: vertical;
 		min-height: 200px;
-		transition: border-color 0.2s, box-shadow 0.2s;
+		transition: border-color 0.2s, box-shadow 0.2s, background-color 200ms, color 200ms;
 		outline: none;
 		box-sizing: border-box;
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), inset 0 1px 2px rgba(0, 0, 0, 0.04);

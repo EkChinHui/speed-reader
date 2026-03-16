@@ -211,6 +211,7 @@
 		justify-content: center;
 		cursor: none;
 		user-select: none;
+		transition: background-color 200ms, color 200ms;
 	}
 
 	.reader.controls-visible {
