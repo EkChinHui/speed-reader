@@ -15,6 +15,8 @@
 	});
 	let showControls = $state(true);
 	let controlsTimeout: ReturnType<typeof setTimeout> | null = null;
+	let currentIndex = $state(0);
+	let totalWords = $state(0);
 	let engine: RSVPEngine;
 	let containerEl: HTMLDivElement | undefined = $state();
 
@@ -25,8 +27,10 @@
 
 	onMount(() => {
 		engine = new RSVPEngine({
-			onWord(word) {
+			onWord(word, index, total) {
 				currentWord = word;
+				currentIndex = index;
+				totalWords = total;
 			},
 			onStateChange(state) {
 				engineState = state;
@@ -127,8 +131,14 @@
 	bind:this={containerEl}
 	style="--font-family: '{appState.font}', sans-serif"
 >
-	<!-- Progress bar -->
-	<div class="progress-bar">
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<div class="progress-bar" onclick={(e) => {
+		const rect = e.currentTarget.getBoundingClientRect();
+		const pct = (e.clientX - rect.left) / rect.width;
+		const idx = Math.round(pct * (totalWords - 1));
+		engine.seekTo(idx);
+	}}>
 		<div class="progress-fill" style="width: {progress * 100}%"></div>
 	</div>
 
@@ -151,7 +161,11 @@
 		{:else if isFinished}
 			<div class="finished-display">
 				<div class="word-display finished-word" style="font-family: var(--font-family)">Done</div>
-				<p class="finished-subtitle">Press Space to restart or Esc to go back</p>
+				<div class="finished-actions">
+					<button class="finished-btn" onclick={() => engine.toggle()}>Restart</button>
+					<button class="finished-btn secondary" onclick={handleBackClick}>Back</button>
+				</div>
+				<p class="finished-subtitle">or press Space / Esc</p>
 			</div>
 		{/if}
 	</div>
@@ -192,10 +206,13 @@
 			</button>
 		</div>
 
-		<div class="speed-display">
-			<button class="speed-nudge" onclick={() => { wpm = Math.max(WPM_MIN, wpm - WPM_STEP); engine.setWPM(wpm); }}>−</button>
-			<span class="speed-value">{wpm}</span>
-			<button class="speed-nudge" onclick={() => { wpm = Math.min(WPM_MAX, wpm + WPM_STEP); engine.setWPM(wpm); }}>+</button>
+		<div class="right-controls">
+			<span class="word-counter">{currentIndex + 1}/{totalWords}</span>
+			<div class="speed-display">
+				<button class="speed-nudge" onclick={() => { wpm = Math.max(WPM_MIN, wpm - WPM_STEP); engine.setWPM(wpm); }}>−</button>
+				<span class="speed-value">{wpm} <small>wpm</small></span>
+				<button class="speed-nudge" onclick={() => { wpm = Math.min(WPM_MAX, wpm + WPM_STEP); engine.setWPM(wpm); }}>+</button>
+			</div>
 		</div>
 	</div>
 </div>
@@ -226,6 +243,13 @@
 		right: 0;
 		height: 4px;
 		background: var(--surface);
+		cursor: pointer;
+		transition: height 0.15s;
+		z-index: 10;
+	}
+
+	.progress-bar:hover {
+		height: 8px;
 	}
 
 	.progress-fill {
@@ -341,10 +365,45 @@
 		100% { text-shadow: none; }
 	}
 
+	.finished-actions {
+		display: flex;
+		gap: 0.75rem;
+		margin-top: 1.5rem;
+		justify-content: center;
+	}
+
+	.finished-btn {
+		padding: 0.6rem 1.5rem;
+		border: none;
+		border-radius: 8px;
+		background: var(--accent);
+		color: #1a1a1e;
+		font-size: 0.95rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+
+	.finished-btn:hover {
+		filter: brightness(1.1);
+		transform: scale(1.03);
+	}
+
+	.finished-btn.secondary {
+		background: transparent;
+		border: 1px solid var(--border);
+		color: var(--text-secondary);
+	}
+
+	.finished-btn.secondary:hover {
+		border-color: var(--border-hover);
+		color: var(--text-primary);
+	}
+
 	.finished-subtitle {
 		color: var(--text-muted);
-		font-size: 0.9rem;
-		margin-top: 1rem;
+		font-size: 0.8rem;
+		margin-top: 0.75rem;
 	}
 
 	/* Context display */
@@ -450,6 +509,19 @@
 		box-shadow: 0 0 24px var(--accent-glow);
 	}
 
+	.right-controls {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 0.25rem;
+	}
+
+	.word-counter {
+		font-size: 0.7rem;
+		color: var(--text-muted);
+		font-variant-numeric: tabular-nums;
+	}
+
 	.speed-display {
 		display: flex;
 		align-items: center;
@@ -462,6 +534,12 @@
 		min-width: 40px;
 		text-align: center;
 		font-variant-numeric: tabular-nums;
+	}
+
+	.speed-value small {
+		font-size: 0.65rem;
+		color: var(--text-muted);
+		font-weight: 400;
 	}
 
 	.speed-nudge {

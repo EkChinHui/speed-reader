@@ -60,15 +60,15 @@
 		font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
-		overflow: hidden;
-		height: 100dvh;
+		overflow-y: auto;
+		min-height: 100dvh;
 		transition: background-color 200ms, color 200ms;
 	}
 
 	.app {
 		position: relative;
 		width: 100%;
-		height: 100dvh;
+		min-height: 100dvh;
 	}
 
 	.phase {

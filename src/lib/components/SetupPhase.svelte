@@ -23,12 +23,6 @@
 	let saved = $derived(timeSaved(words, appState.wpm));
 	let hasText = $derived(cleaned.length > 0);
 
-	function handlePaste(e: ClipboardEvent) {
-		e.preventDefault();
-		const pasted = e.clipboardData?.getData('text/plain') ?? '';
-		appState.rawText = pasted;
-	}
-
 	function startReading() {
 		appState.startReading();
 	}
@@ -39,12 +33,14 @@
 </script>
 
 <div class="setup">
-	<div class="header-row">
-		<div class="header-spacer"></div>
-		<header class="setup-header">
-			<h1 class="title">Speed Reader</h1>
-			<p class="subtitle">Paste your text and read at your own pace</p>
-		</header>
+	<div class="top-bar">
+		<button class="info-toggle" onclick={() => showInfo = true} aria-label="How it works">
+			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<circle cx="12" cy="12" r="10"/>
+				<line x1="12" y1="16" x2="12" y2="12"/>
+				<line x1="12" y1="8" x2="12.01" y2="8"/>
+			</svg>
+		</button>
 		<button class="theme-toggle" onclick={() => appState.toggleTheme()} aria-label="Toggle theme">
 			{#key appState.theme}
 				{#if appState.theme === 'dark'}
@@ -68,16 +64,10 @@
 		</button>
 	</div>
 
-	<div class="info-section">
-		<button class="info-toggle" onclick={() => showInfo = true}>
-			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				<circle cx="12" cy="12" r="10"/>
-				<line x1="12" y1="16" x2="12" y2="12"/>
-				<line x1="12" y1="8" x2="12.01" y2="8"/>
-			</svg>
-			How it works
-		</button>
-	</div>
+	<header class="setup-header">
+		<h1 class="title">Speed Reader</h1>
+		<p class="subtitle">Paste your text and read at your own pace</p>
+	</header>
 
 	{#if showInfo}
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -141,37 +131,32 @@
 		<textarea
 			bind:this={textareaEl}
 			bind:value={appState.rawText}
-			onpaste={handlePaste}
 			placeholder="Paste your article or text here..."
 			class="text-input"
-			rows="10"
+			rows="6"
 		></textarea>
 
 		{#if hasText}
-			<div class="stats">
-				<div class="stat" style="--i: 0">
-					<span class="stat-value">{words.toLocaleString()}</span>
-					<span class="stat-label">words</span>
-				</div>
-				<div class="stat" style="--i: 1">
-					<span class="stat-value">{chars.toLocaleString()}</span>
-					<span class="stat-label">characters</span>
-				</div>
-				<div class="stat" style="--i: 2">
-					<span class="stat-value">{formatTime(readTime)}</span>
-					<span class="stat-label">read time</span>
-				</div>
-				<div class="stat highlight" style="--i: 3">
-					<span class="stat-value">{formatTime(saved)}</span>
-					<span class="stat-label">saved vs avg</span>
-				</div>
+			<div class="stats-line">
+				<span>{words} words</span>
+				<span class="stats-dot"></span>
+				<span>{chars} chars</span>
+				<span class="stats-dot"></span>
+				<span>{formatTime(readTime)}</span>
+				{#if saved > 0}
+					<span class="stats-dot"></span>
+					<span class="stats-highlight">{formatTime(saved)} saved</span>
+				{/if}
 			</div>
 		{/if}
 	</div>
 
-	<button class="start-btn" disabled={!hasText} onclick={startReading}>
-		Start Reading
-	</button>
+	<div class="bottom-section">
+		<button class="start-btn" disabled={!hasText} onclick={startReading}>
+			Start Reading
+		</button>
+		<p class="keyboard-hint">space pause · arrows speed · esc exit</p>
+	</div>
 </div>
 
 <style>
@@ -191,27 +176,28 @@
 		text-align: center;
 	}
 
-	.info-section {
+	.top-bar {
 		display: flex;
-		flex-direction: column;
+		justify-content: space-between;
 		align-items: center;
 	}
 
 	.info-toggle {
+		width: 36px;
+		height: 36px;
+		border-radius: 50%;
+		border: 1px solid var(--border);
+		background: var(--surface);
+		color: var(--text-muted);
+		cursor: pointer;
 		display: flex;
 		align-items: center;
-		gap: 0.4rem;
-		background: none;
-		border: none;
-		color: var(--text-muted);
-		font-size: 0.85rem;
-		cursor: pointer;
-		padding: 0.3rem 0.6rem;
-		border-radius: 8px;
-		transition: color 0.2s;
+		justify-content: center;
+		transition: border-color 0.2s, color 0.2s;
 	}
 
 	.info-toggle:hover {
+		border-color: var(--border-hover);
 		color: var(--text-secondary);
 	}
 
@@ -329,17 +315,6 @@
 		line-height: 1.4;
 	}
 
-	.header-row {
-		display: flex;
-		align-items: flex-start;
-		justify-content: center;
-		position: relative;
-	}
-
-	.header-spacer {
-		width: 36px;
-	}
-
 	.theme-toggle {
 		width: 36px;
 		height: 36px;
@@ -408,7 +383,7 @@
 		font-size: 0.95rem;
 		font-family: inherit;
 		resize: vertical;
-		min-height: 200px;
+		min-height: 120px;
 		transition: border-color 0.2s, box-shadow 0.2s, background-color 200ms, color 200ms;
 		outline: none;
 		box-sizing: border-box;
@@ -424,52 +399,26 @@
 		color: var(--text-muted);
 	}
 
-	.stats {
+	.stats-line {
 		display: flex;
-		gap: 0.75rem;
+		align-items: center;
 		justify-content: center;
+		gap: 0.5rem;
+		font-size: 0.8rem;
+		color: var(--text-muted);
 		flex-wrap: wrap;
 	}
 
-	.stat {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 0.15rem;
-		background: var(--surface-raised);
-		border-radius: 10px;
-		padding: 0.5rem 1rem;
-		animation: statFadeIn 300ms ease both;
-		animation-delay: calc(var(--i) * 50ms);
+	.stats-dot {
+		width: 3px;
+		height: 3px;
+		border-radius: 50%;
+		background: var(--text-muted);
+		opacity: 0.4;
 	}
 
-	.stat-value {
-		font-size: 1.3rem;
-		font-weight: 600;
-		color: var(--text-primary);
-		font-variant-numeric: tabular-nums;
-	}
-
-	.stat-label {
-		font-size: 0.75rem;
-		color: var(--text-muted);
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-	}
-
-	.stat.highlight .stat-value {
+	.stats-highlight {
 		color: var(--accent);
-	}
-
-	@keyframes statFadeIn {
-		from {
-			opacity: 0;
-			transform: translateY(6px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
 	}
 
 	.config-bar {
@@ -519,6 +468,19 @@
 		color: var(--accent);
 	}
 
+	@media (max-width: 480px) {
+		.config-bar {
+			gap: 0.1rem;
+		}
+		.config-opt {
+			font-size: 0.75rem;
+			padding: 0.2rem 0.35rem;
+		}
+		.config-bar-label {
+			font-size: 0.6rem;
+		}
+	}
+
 	.start-btn {
 		align-self: center;
 		padding: 0.9rem 3rem;
@@ -545,9 +507,23 @@
 	}
 
 	.start-btn:disabled {
-		filter: grayscale(0.6);
-		opacity: 0.35;
+		opacity: 0.5;
 		cursor: not-allowed;
 		box-shadow: none;
+		background: var(--surface-raised);
+		color: var(--text-muted);
+	}
+
+	.bottom-section {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.keyboard-hint {
+		font-size: 0.7rem;
+		color: var(--text-muted);
+		letter-spacing: 0.03em;
 	}
 </style>

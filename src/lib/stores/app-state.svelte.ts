@@ -8,11 +8,11 @@ export const FONT_OPTIONS: { label: string; value: FontFamily }[] = [
 	{ label: 'Space Grotesk', value: 'Space Grotesk' }
 ];
 
-export const SPEED_PRESETS = [200, 300, 400, 500, 600];
-export const DEFAULT_WPM = 300;
+export const SPEED_PRESETS = [400, 500, 600, 700, 800];
+export const DEFAULT_WPM = 500;
 export const WPM_STEP = 25;
-export const WPM_MIN = 100;
-export const WPM_MAX = 1000;
+export const WPM_MIN = 400;
+export const WPM_MAX = 1200;
 
 const STORAGE_KEY = 'rsvp-settings';
 
@@ -40,7 +40,7 @@ function loadSettings(): PersistedSettings {
 			const parsed = JSON.parse(raw);
 			const validThemes = ['light', 'dark'];
 			return {
-				wpm: typeof parsed.wpm === 'number' ? parsed.wpm : DEFAULT_WPM,
+				wpm: typeof parsed.wpm === 'number' ? Math.max(WPM_MIN, Math.min(WPM_MAX, parsed.wpm)) : DEFAULT_WPM,
 				font: FONT_OPTIONS.some((o) => o.value === parsed.font) ? parsed.font : 'Inter',
 				theme: validThemes.includes(parsed.theme) ? parsed.theme : resolveSystemTheme(),
 				rawText: typeof parsed.rawText === 'string' ? parsed.rawText : ''
