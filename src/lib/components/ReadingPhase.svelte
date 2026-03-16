@@ -32,6 +32,8 @@
 				engineState = state;
 				if (state === 'paused') {
 					contextWords = engine.getContext(8);
+					showControls = true;
+				} else if (state === 'playing') {
 					showControlsTemporarily();
 				}
 			},
@@ -60,10 +62,17 @@
 	function showControlsTemporarily() {
 		showControls = true;
 		if (controlsTimeout) clearTimeout(controlsTimeout);
+		controlsTimeout = setTimeout(() => {
+			if (engineState === 'playing') {
+				showControls = false;
+			}
+		}, 2500);
 	}
 
 	function handleMouseMove() {
-		showControlsTemporarily();
+		if (isPlaying) {
+			showControlsTemporarily();
+		}
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
@@ -123,17 +132,17 @@
 		<div class="progress-fill" style="width: {progress * 100}%"></div>
 	</div>
 
+	<!-- ORP center guide line -->
+	<div class="orp-center-line"></div>
+
 	<!-- Main word display -->
 	<div class="word-container">
 		{#if currentWord}
 			{@const parts = renderORPWord(currentWord)}
-			<div class="word-display" style="font-family: var(--font-family)">
-				<span class="word-before">{parts.before}</span><span class="word-orp">{parts.orp}</span><span class="word-after">{parts.after}</span>
-			</div>
-
-			<!-- ORP alignment guide -->
-			<div class="orp-guide">
-				<div class="orp-tick"></div>
+			<div class="word-display-wrapper">
+				<div class="word-display" style="font-family: var(--font-family)">
+					<span class="word-before">{parts.before}</span><span class="word-orp">{parts.orp}</span><span class="word-after">{parts.after}</span>
+				</div>
 			</div>
 		{:else if isIdle}
 			<div class="word-display idle-text" style="font-family: var(--font-family)">
@@ -224,6 +233,19 @@
 		transition: width 0.1s linear;
 	}
 
+	/* ORP center guide */
+	.orp-center-line {
+		position: absolute;
+		left: 50%;
+		top: calc(50% - 3.2rem);
+		width: 2px;
+		height: 10px;
+		background: var(--accent);
+		opacity: 0.3;
+		border-radius: 1px;
+		transform: translateX(-50%);
+	}
+
 	/* Word display */
 	.word-container {
 		position: relative;
@@ -232,7 +254,18 @@
 		align-items: center;
 	}
 
+	.word-display-wrapper {
+		display: grid;
+		grid-template-columns: 1fr auto 1fr;
+		width: 100vw;
+		max-width: 100vw;
+		overflow: hidden;
+	}
+
 	.word-display {
+		grid-column: 1 / -1;
+		display: grid;
+		grid-template-columns: subgrid;
 		font-size: clamp(2.5rem, 7vw, 5rem);
 		font-weight: 500;
 		letter-spacing: 0.02em;
@@ -242,32 +275,25 @@
 
 	.idle-text {
 		opacity: 0.3;
+		display: block !important;
+		text-align: center;
+		grid-column: 1 / -1;
 	}
 
-	.word-before,
+	.word-before {
+		color: var(--text-primary);
+		text-align: right;
+	}
+
 	.word-after {
 		color: var(--text-primary);
+		text-align: left;
 	}
 
 	.word-orp {
 		color: var(--accent);
 		font-weight: 700;
-	}
-
-	.orp-guide {
-		position: relative;
-		width: 100%;
-		display: flex;
-		justify-content: center;
-		margin-top: 0.5rem;
-	}
-
-	.orp-tick {
-		width: 2px;
-		height: 12px;
-		background: var(--accent);
-		opacity: 0.4;
-		border-radius: 1px;
+		text-align: center;
 	}
 
 	/* Finished */

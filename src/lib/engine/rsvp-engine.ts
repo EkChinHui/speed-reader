@@ -114,15 +114,17 @@ export class RSVPEngine {
 
 	/** Get surrounding context words for pause display */
 	getContext(radius: number = 8): { before: Word[]; current: Word | null; after: Word[] } {
-		if (this.words.length === 0 || this.currentIndex >= this.words.length) {
+		// currentIndex points to the NEXT word to show, so the displayed word is one behind
+		const displayedIndex = Math.max(0, this.currentIndex - 1);
+		if (this.words.length === 0 || displayedIndex >= this.words.length) {
 			return { before: [], current: null, after: [] };
 		}
-		const start = Math.max(0, this.currentIndex - radius);
-		const end = Math.min(this.words.length, this.currentIndex + radius + 1);
+		const start = Math.max(0, displayedIndex - radius);
+		const end = Math.min(this.words.length, displayedIndex + radius + 1);
 		return {
-			before: this.words.slice(start, this.currentIndex),
-			current: this.words[this.currentIndex],
-			after: this.words.slice(this.currentIndex + 1, end)
+			before: this.words.slice(start, displayedIndex),
+			current: this.words[displayedIndex],
+			after: this.words.slice(displayedIndex + 1, end)
 		};
 	}
 
