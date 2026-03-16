@@ -86,19 +86,19 @@
 
 		{#if hasText}
 			<div class="stats">
-				<div class="stat">
+				<div class="stat" style="--i: 0">
 					<span class="stat-value">{words.toLocaleString()}</span>
 					<span class="stat-label">words</span>
 				</div>
-				<div class="stat">
+				<div class="stat" style="--i: 1">
 					<span class="stat-value">{chars.toLocaleString()}</span>
 					<span class="stat-label">characters</span>
 				</div>
-				<div class="stat">
+				<div class="stat" style="--i: 2">
 					<span class="stat-value">{formatTime(readTime)}</span>
 					<span class="stat-label">read time</span>
 				</div>
-				<div class="stat highlight">
+				<div class="stat highlight" style="--i: 3">
 					<span class="stat-value">{formatTime(saved)}</span>
 					<span class="stat-label">saved vs avg</span>
 				</div>
@@ -262,7 +262,7 @@
 
 	.stats {
 		display: flex;
-		gap: 1.5rem;
+		gap: 0.75rem;
 		justify-content: center;
 		flex-wrap: wrap;
 	}
@@ -272,12 +272,18 @@
 		flex-direction: column;
 		align-items: center;
 		gap: 0.15rem;
+		background: var(--surface-raised);
+		border-radius: 10px;
+		padding: 0.5rem 1rem;
+		animation: statFadeIn 300ms ease both;
+		animation-delay: calc(var(--i) * 50ms);
 	}
 
 	.stat-value {
 		font-size: 1.3rem;
 		font-weight: 600;
 		color: var(--text-primary);
+		font-variant-numeric: tabular-nums;
 	}
 
 	.stat-label {
@@ -289,6 +295,17 @@
 
 	.stat.highlight .stat-value {
 		color: var(--accent);
+	}
+
+	@keyframes statFadeIn {
+		from {
+			opacity: 0;
+			transform: translateY(6px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
 	}
 
 	.config-section {
