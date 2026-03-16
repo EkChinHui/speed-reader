@@ -1,0 +1,354 @@
+<script lang="ts">
+	import {
+		appState,
+		FONT_OPTIONS,
+		SPEED_PRESETS,
+		WPM_STEP,
+		WPM_MIN,
+		WPM_MAX
+	} from '$lib/stores/app-state.svelte';
+	import {
+		cleanText,
+		wordCount,
+		charCount,
+		estimateReadTime,
+		timeSaved,
+		formatTime
+	} from '$lib/engine/text-processor';
+
+	let textareaEl: HTMLTextAreaElement | undefined = $state();
+
+	let cleaned = $derived(cleanText(appState.rawText));
+	let words = $derived(wordCount(cleaned));
+	let chars = $derived(charCount(cleaned));
+	let readTime = $derived(estimateReadTime(words, appState.wpm));
+	let saved = $derived(timeSaved(words, appState.wpm));
+	let hasText = $derived(cleaned.length > 0);
+
+	function handlePaste(e: ClipboardEvent) {
+		e.preventDefault();
+		const pasted = e.clipboardData?.getData('text/plain') ?? '';
+		appState.rawText = pasted;
+	}
+
+	function nudgeWPM(delta: number) {
+		appState.wpm = Math.max(WPM_MIN, Math.min(WPM_MAX, appState.wpm + delta));
+	}
+
+	function startReading() {
+		appState.startReading();
+	}
+
+	$effect(() => {
+		textareaEl?.focus();
+	});
+</script>
+
+<div class="setup">
+	<header class="setup-header">
+		<h1 class="title">Speed Reader</h1>
+		<p class="subtitle">Paste your text and read at your own pace</p>
+	</header>
+
+	<div class="input-section">
+		<textarea
+			bind:this={textareaEl}
+			bind:value={appState.rawText}
+			onpaste={handlePaste}
+			placeholder="Paste your article or text here..."
+			class="text-input"
+			rows="10"
+		></textarea>
+
+		{#if hasText}
+			<div class="stats">
+				<div class="stat">
+					<span class="stat-value">{words.toLocaleString()}</span>
+					<span class="stat-label">words</span>
+				</div>
+				<div class="stat">
+					<span class="stat-value">{chars.toLocaleString()}</span>
+					<span class="stat-label">characters</span>
+				</div>
+				<div class="stat">
+					<span class="stat-value">{formatTime(readTime)}</span>
+					<span class="stat-label">read time</span>
+				</div>
+				<div class="stat highlight">
+					<span class="stat-value">{formatTime(saved)}</span>
+					<span class="stat-label">saved vs avg</span>
+				</div>
+			</div>
+		{/if}
+	</div>
+
+	<div class="config-section">
+		<div class="speed-control">
+			<label class="config-label">Speed</label>
+			<div class="speed-row">
+				<button class="nudge-btn" onclick={() => nudgeWPM(-WPM_STEP)}>−</button>
+				<span class="wpm-display">{appState.wpm} <small>WPM</small></span>
+				<button class="nudge-btn" onclick={() => nudgeWPM(WPM_STEP)}>+</button>
+			</div>
+			<div class="speed-presets">
+				{#each SPEED_PRESETS as preset}
+					<button
+						class="preset-btn"
+						class:active={appState.wpm === preset}
+						onclick={() => (appState.wpm = preset)}
+					>
+						{preset}
+					</button>
+				{/each}
+			</div>
+		</div>
+
+		<div class="font-control">
+			<label class="config-label">Font</label>
+			<div class="font-options">
+				{#each FONT_OPTIONS as opt}
+					<button
+						class="font-btn"
+						class:active={appState.font === opt.value}
+						style="font-family: '{opt.value}', sans-serif"
+						onclick={() => (appState.font = opt.value)}
+					>
+						{opt.label}
+					</button>
+				{/each}
+			</div>
+		</div>
+	</div>
+
+	<button class="start-btn" disabled={!hasText} onclick={startReading}>
+		Start Reading
+	</button>
+</div>
+
+<style>
+	.setup {
+		max-width: 640px;
+		margin: 0 auto;
+		padding: 3rem 1.5rem;
+		display: flex;
+		flex-direction: column;
+		gap: 2rem;
+		min-height: 100dvh;
+		justify-content: center;
+	}
+
+	.setup-header {
+		text-align: center;
+	}
+
+	.title {
+		font-size: 2.5rem;
+		font-weight: 700;
+		letter-spacing: -0.03em;
+		color: var(--text-primary);
+		margin: 0;
+	}
+
+	.subtitle {
+		color: var(--text-secondary);
+		margin: 0.5rem 0 0;
+		font-size: 1.1rem;
+	}
+
+	.input-section {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.text-input {
+		width: 100%;
+		padding: 1rem;
+		border: 1px solid var(--border);
+		border-radius: 12px;
+		background: var(--surface);
+		color: var(--text-primary);
+		font-size: 0.95rem;
+		font-family: inherit;
+		resize: vertical;
+		min-height: 200px;
+		transition: border-color 0.2s;
+		outline: none;
+		box-sizing: border-box;
+	}
+
+	.text-input:focus {
+		border-color: var(--accent);
+	}
+
+	.text-input::placeholder {
+		color: var(--text-muted);
+	}
+
+	.stats {
+		display: flex;
+		gap: 1.5rem;
+		justify-content: center;
+		flex-wrap: wrap;
+	}
+
+	.stat {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.15rem;
+	}
+
+	.stat-value {
+		font-size: 1.3rem;
+		font-weight: 600;
+		color: var(--text-primary);
+	}
+
+	.stat-label {
+		font-size: 0.75rem;
+		color: var(--text-muted);
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+
+	.stat.highlight .stat-value {
+		color: var(--accent);
+	}
+
+	.config-section {
+		display: flex;
+		gap: 2rem;
+		justify-content: center;
+		flex-wrap: wrap;
+	}
+
+	.config-label {
+		display: block;
+		font-size: 0.8rem;
+		color: var(--text-muted);
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		margin-bottom: 0.5rem;
+		text-align: center;
+	}
+
+	.speed-row {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		justify-content: center;
+	}
+
+	.wpm-display {
+		font-size: 1.5rem;
+		font-weight: 600;
+		color: var(--text-primary);
+		min-width: 100px;
+		text-align: center;
+	}
+
+	.wpm-display small {
+		font-size: 0.7em;
+		color: var(--text-muted);
+		font-weight: 400;
+	}
+
+	.nudge-btn {
+		width: 36px;
+		height: 36px;
+		border-radius: 50%;
+		border: 1px solid var(--border);
+		background: var(--surface);
+		color: var(--text-primary);
+		font-size: 1.2rem;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.15s;
+	}
+
+	.nudge-btn:hover {
+		border-color: var(--accent);
+		color: var(--accent);
+	}
+
+	.speed-presets {
+		display: flex;
+		gap: 0.4rem;
+		margin-top: 0.5rem;
+		justify-content: center;
+	}
+
+	.preset-btn {
+		padding: 0.3rem 0.6rem;
+		border: 1px solid var(--border);
+		border-radius: 6px;
+		background: transparent;
+		color: var(--text-secondary);
+		font-size: 0.8rem;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+
+	.preset-btn:hover {
+		border-color: var(--text-secondary);
+	}
+
+	.preset-btn.active {
+		background: var(--accent);
+		color: var(--bg);
+		border-color: var(--accent);
+	}
+
+	.font-options {
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	.font-btn {
+		padding: 0.4rem 0.8rem;
+		border: 1px solid var(--border);
+		border-radius: 8px;
+		background: transparent;
+		color: var(--text-secondary);
+		font-size: 0.9rem;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+
+	.font-btn:hover {
+		border-color: var(--text-secondary);
+	}
+
+	.font-btn.active {
+		background: var(--accent);
+		color: var(--bg);
+		border-color: var(--accent);
+	}
+
+	.start-btn {
+		align-self: center;
+		padding: 0.9rem 3rem;
+		border: none;
+		border-radius: 12px;
+		background: var(--accent);
+		color: var(--bg);
+		font-size: 1.1rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.2s;
+		letter-spacing: 0.01em;
+	}
+
+	.start-btn:hover:not(:disabled) {
+		filter: brightness(1.15);
+		transform: translateY(-1px);
+	}
+
+	.start-btn:disabled {
+		opacity: 0.3;
+		cursor: not-allowed;
+	}
+</style>
