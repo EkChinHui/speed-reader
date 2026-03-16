@@ -13,16 +13,58 @@ export const WPM_STEP = 25;
 export const WPM_MIN = 100;
 export const WPM_MAX = 1000;
 
+const STORAGE_KEY = 'rsvp-settings';
+
+interface PersistedSettings {
+	wpm: number;
+	font: FontFamily;
+}
+
+function loadSettings(): PersistedSettings {
+	try {
+		const raw = localStorage.getItem(STORAGE_KEY);
+		if (raw) {
+			const parsed = JSON.parse(raw);
+			return {
+				wpm: typeof parsed.wpm === 'number' ? parsed.wpm : DEFAULT_WPM,
+				font: FONT_OPTIONS.some((o) => o.value === parsed.font) ? parsed.font : 'Inter'
+			};
+		}
+	} catch {
+		// ignore
+	}
+	return { wpm: DEFAULT_WPM, font: 'Inter' };
+}
+
+function saveSettings(settings: PersistedSettings) {
+	try {
+		localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+	} catch {
+		// ignore
+	}
+}
+
 class AppState {
 	phase = $state<Phase>('setup');
 	rawText = $state('');
 	wpm = $state(DEFAULT_WPM);
 	font = $state<FontFamily>('Inter');
 
+	constructor() {
+		const saved = loadSettings();
+		this.wpm = saved.wpm;
+		this.font = saved.font;
+
+		$effect.root(() => {
+			$effect(() => {
+				saveSettings({ wpm: this.wpm, font: this.font });
+			});
+		});
+	}
+
 	reset() {
 		this.phase = 'setup';
 		this.rawText = '';
-		this.wpm = DEFAULT_WPM;
 	}
 
 	startReading() {
