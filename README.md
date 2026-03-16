@@ -1,42 +1,56 @@
-# sv
+# RSVP Speed Reader
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A web-based speed reader using the Rapid Serial Visual Presentation (RSVP) technique. Paste long-form content and read it word-by-word at configurable speeds with a cinematic, distraction-free interface.
 
-## Creating a project
+## Features
 
-If you're seeing this, you've probably already done this step. Congrats!
+- **ORP-aligned display** — words are centered on their Optimal Recognition Point, eliminating eye movement
+- **Adaptive word timing** — longer words and punctuation automatically get more display time
+- **Smart paste** — auto-cleans HTML and formatting from pasted text
+- **Reading stats** — word count, read time estimate, and time saved vs average reading speed (238 WPM)
+- **Keyboard-first controls** — Spacebar pause/resume, arrow keys for speed, Escape to exit
+- **Pause context** — surrounding sentence reveals when paused, with 4-word rewind on resume
+- **Font selection** — Inter, Lora, or Space Grotesk
+- **Speed presets** — 200–600 WPM presets with ±25 WPM nudging (range: 100–1000)
 
-```sh
-# create a new project
-npx sv create my-app
-```
+## Getting Started
 
-To recreate this project with the same configuration:
-
-```sh
-# recreate this project
-npx sv@0.12.7 create --template minimal --types ts --no-install rsvp-speed-reader
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+Requires Node 22+ (`.nvmrc` included).
 
 ```sh
+nvm use
+npm install
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
 ## Building
-
-To create a production version of your app:
 
 ```sh
 npm run build
 ```
 
-You can preview the production build with `npm run preview`.
+Static output goes to `build/` — deploy anywhere (Vercel, Netlify, GitHub Pages, etc).
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+## Project Structure
+
+```
+src/
+  lib/
+    engine/
+      text-processor.ts      # Text cleaning, tokenization, ORP calculation, adaptive timing
+      rsvp-engine.ts         # Playback state machine with callbacks
+    stores/
+      app-state.svelte.ts    # Global app state (phase, WPM, font)
+    components/
+      SetupPhase.svelte      # Text input, stats, configuration
+      ReadingPhase.svelte    # Word display, controls, progress bar
+  routes/
+    +page.svelte             # Phase switching with transitions
+    +layout.ts               # SPA mode configuration
+```
+
+## Tech Stack
+
+- SvelteKit with Svelte 5 (runes)
+- TypeScript
+- Static adapter (fully client-side, no backend)
