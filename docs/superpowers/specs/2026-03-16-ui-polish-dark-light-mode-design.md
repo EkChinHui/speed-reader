@@ -74,9 +74,8 @@ Add an inline `<script>` in `<head>` before `%sveltekit.head%` that:
         return;
       }
     } catch(e) {}
-    if (window.matchMedia('(prefers-color-scheme: light)').matches) {
-      document.documentElement.dataset.theme = 'light';
-    }
+    document.documentElement.dataset.theme =
+      window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
   })();
 </script>
 ```
