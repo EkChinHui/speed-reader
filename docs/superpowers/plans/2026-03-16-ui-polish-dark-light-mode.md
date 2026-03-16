@@ -274,7 +274,25 @@ Replace the `<header class="setup-header">` section with:
 </div>
 ```
 
-Note: When dark, show sun icon (switch to light). When light, show moon icon (switch to dark).
+Note: When dark, show sun icon (switch to light). When light, show moon icon (switch to dark). Each icon SVG gets `class="theme-icon"` for the swap animation.
+
+Wrap each SVG in a `{#key}` block to trigger mount animation on swap:
+
+```svelte
+<button class="theme-toggle" onclick={() => appState.toggleTheme()} aria-label="Toggle theme">
+  {#key appState.theme}
+    {#if appState.theme === 'dark'}
+      <svg class="theme-icon" width="18" height="18" ...>
+        <!-- sun icon -->
+      </svg>
+    {:else}
+      <svg class="theme-icon" width="18" height="18" ...>
+        <!-- moon icon -->
+      </svg>
+    {/if}
+  {/key}
+</button>
+```
 
 - [ ] **Step 2: Add theme toggle styles**
 
@@ -301,14 +319,28 @@ Note: When dark, show sun icon (switch to light). When light, show moon icon (sw
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s;
+  transition: border-color 0.2s, color 0.2s;
   flex-shrink: 0;
 }
 
 .theme-toggle:hover {
   border-color: var(--border-hover);
   color: var(--text-primary);
-  transform: rotate(30deg);
+}
+
+.theme-icon {
+  animation: iconSwap 300ms ease both;
+}
+
+@keyframes iconSwap {
+  from {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
 }
 ```
 
