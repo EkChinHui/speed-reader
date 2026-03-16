@@ -9,7 +9,20 @@
 			href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
 			rel="stylesheet"
 		/>
-		%sveltekit.head%
+	<script>
+		(function() {
+			try {
+				var s = JSON.parse(localStorage.getItem('rsvp-settings'));
+				if (s && (s.theme === 'light' || s.theme === 'dark')) {
+					document.documentElement.dataset.theme = s.theme;
+					return;
+				}
+			} catch(e) {}
+			document.documentElement.dataset.theme =
+				window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+		})();
+	</script>
+	%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">%sveltekit.body%</div>
