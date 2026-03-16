@@ -215,8 +215,11 @@
 		font-size: 2.5rem;
 		font-weight: 700;
 		letter-spacing: -0.03em;
-		color: var(--text-primary);
 		margin: 0;
+		background: linear-gradient(135deg, var(--accent), #818cf8);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
 	}
 
 	.subtitle {
@@ -235,20 +238,22 @@
 		width: 100%;
 		padding: 1rem;
 		border: 1px solid var(--border);
-		border-radius: 12px;
+		border-radius: 14px;
 		background: var(--surface);
 		color: var(--text-primary);
 		font-size: 0.95rem;
 		font-family: inherit;
 		resize: vertical;
 		min-height: 200px;
-		transition: border-color 0.2s;
+		transition: border-color 0.2s, box-shadow 0.2s;
 		outline: none;
 		box-sizing: border-box;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), inset 0 1px 2px rgba(0, 0, 0, 0.04);
 	}
 
 	.text-input:focus {
 		border-color: var(--accent);
+		box-shadow: 0 0 0 3px var(--accent-glow);
 	}
 
 	.text-input::placeholder {
