@@ -137,6 +137,11 @@
 						style="font-family: '{opt.value}', sans-serif"
 						onclick={() => (appState.font = opt.value)}
 					>
+						{#if appState.font === opt.value}
+							<svg class="check-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+								<polyline points="20 6 9 17 4 12"/>
+							</svg>
+						{/if}
 						{opt.label}
 					</button>
 				{/each}
@@ -313,6 +318,18 @@
 		gap: 2rem;
 		justify-content: center;
 		flex-wrap: wrap;
+		animation: configFadeIn 400ms ease both;
+	}
+
+	@keyframes configFadeIn {
+		from {
+			opacity: 0;
+			transform: translateY(8px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
 	}
 
 	.config-label {
@@ -364,6 +381,8 @@
 	.nudge-btn:hover {
 		border-color: var(--accent);
 		color: var(--accent);
+		transform: scale(1.05);
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 	}
 
 	.speed-presets {
@@ -376,7 +395,7 @@
 	.preset-btn {
 		padding: 0.3rem 0.6rem;
 		border: 1px solid var(--border);
-		border-radius: 6px;
+		border-radius: 8px;
 		background: transparent;
 		color: var(--text-secondary);
 		font-size: 0.8rem;
@@ -385,7 +404,13 @@
 	}
 
 	.preset-btn:hover {
-		border-color: var(--text-secondary);
+		border-color: var(--border-hover);
+		transform: scale(1.05);
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	}
+
+	.preset-btn:active {
+		transform: scale(0.95);
 	}
 
 	.preset-btn.active {
@@ -408,16 +433,24 @@
 		font-size: 0.9rem;
 		cursor: pointer;
 		transition: all 0.15s;
+		display: flex;
+		align-items: center;
+		gap: 0.35rem;
 	}
 
 	.font-btn:hover {
-		border-color: var(--text-secondary);
+		border-color: var(--border-hover);
+		transform: scale(1.02);
 	}
 
 	.font-btn.active {
 		background: var(--accent);
-		color: var(--bg);
+		color: white;
 		border-color: var(--accent);
+	}
+
+	.check-icon {
+		flex-shrink: 0;
 	}
 
 	.start-btn {
@@ -425,22 +458,30 @@
 		padding: 0.9rem 3rem;
 		border: none;
 		border-radius: 12px;
-		background: var(--accent);
-		color: var(--bg);
+		background: linear-gradient(135deg, #6366f1, #818cf8);
+		color: white;
 		font-size: 1.1rem;
 		font-weight: 600;
 		cursor: pointer;
 		transition: all 0.2s;
 		letter-spacing: 0.01em;
+		box-shadow: 0 4px 20px rgba(99, 102, 241, 0.25);
 	}
 
 	.start-btn:hover:not(:disabled) {
-		filter: brightness(1.15);
+		filter: brightness(1.1);
 		transform: translateY(-1px);
+		box-shadow: 0 6px 28px rgba(99, 102, 241, 0.35);
+	}
+
+	.start-btn:active:not(:disabled) {
+		transform: scale(0.97);
 	}
 
 	.start-btn:disabled {
-		opacity: 0.3;
+		filter: grayscale(0.6);
+		opacity: 0.35;
 		cursor: not-allowed;
+		box-shadow: none;
 	}
 </style>
