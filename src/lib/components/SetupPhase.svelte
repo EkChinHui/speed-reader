@@ -17,6 +17,7 @@
 	} from '$lib/engine/text-processor';
 
 	let textareaEl: HTMLTextAreaElement | undefined = $state();
+	let showInfo = $state(false);
 
 	let cleaned = $derived(cleanText(appState.rawText));
 	let words = $derived(wordCount(cleaned));
@@ -72,6 +73,39 @@
 				{/if}
 			{/key}
 		</button>
+	</div>
+
+	<div class="info-section">
+		<button class="info-toggle" onclick={() => showInfo = !showInfo}>
+			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<circle cx="12" cy="12" r="10"/>
+				<line x1="12" y1="16" x2="12" y2="12"/>
+				<line x1="12" y1="8" x2="12.01" y2="8"/>
+			</svg>
+			How it works
+			<svg class="info-chevron" class:open={showInfo} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<polyline points="6 9 12 15 18 9"/>
+			</svg>
+		</button>
+		{#if showInfo}
+			<div class="info-content">
+				<p>This app uses <strong>RSVP</strong> (Rapid Serial Visual Presentation) to help you read faster. Instead of scanning lines of text, words are shown one at a time at a fixed point — eliminating eye movement and letting you focus purely on comprehension.</p>
+				<div class="info-features">
+					<div class="info-feature">
+						<span class="info-feature-title">ORP alignment</span>
+						<span class="info-feature-desc">Each word is positioned at its Optimal Recognition Point — the character your eye naturally fixates on first</span>
+					</div>
+					<div class="info-feature">
+						<span class="info-feature-title">Smart pacing</span>
+						<span class="info-feature-desc">Longer words and punctuation get extra display time so you never feel rushed</span>
+					</div>
+					<div class="info-feature">
+						<span class="info-feature-title">Keyboard controls</span>
+						<span class="info-feature-desc">Space to pause, arrows to adjust speed, Esc to exit</span>
+					</div>
+				</div>
+			</div>
+		{/if}
 	</div>
 
 	<div class="input-section">
@@ -169,6 +203,97 @@
 
 	.setup-header {
 		text-align: center;
+	}
+
+	.info-section {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+
+	.info-toggle {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		background: none;
+		border: none;
+		color: var(--text-muted);
+		font-size: 0.85rem;
+		cursor: pointer;
+		padding: 0.3rem 0.6rem;
+		border-radius: 8px;
+		transition: color 0.2s;
+	}
+
+	.info-toggle:hover {
+		color: var(--text-secondary);
+	}
+
+	.info-chevron {
+		transition: transform 0.2s ease;
+	}
+
+	.info-chevron.open {
+		transform: rotate(180deg);
+	}
+
+	.info-content {
+		margin-top: 0.75rem;
+		max-width: 520px;
+		animation: infoFadeIn 300ms ease both;
+	}
+
+	.info-content p {
+		color: var(--text-secondary);
+		font-size: 0.9rem;
+		line-height: 1.6;
+		text-align: center;
+		margin: 0 0 1rem;
+	}
+
+	.info-content strong {
+		color: var(--accent);
+		font-weight: 600;
+	}
+
+	.info-features {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.info-feature {
+		display: flex;
+		flex-direction: column;
+		gap: 0.1rem;
+		padding: 0.6rem 0.8rem;
+		background: var(--surface-raised);
+		border-radius: 10px;
+	}
+
+	.info-feature-title {
+		font-size: 0.8rem;
+		font-weight: 600;
+		color: var(--text-primary);
+		text-transform: uppercase;
+		letter-spacing: 0.03em;
+	}
+
+	.info-feature-desc {
+		font-size: 0.85rem;
+		color: var(--text-secondary);
+		line-height: 1.4;
+	}
+
+	@keyframes infoFadeIn {
+		from {
+			opacity: 0;
+			transform: translateY(-4px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
 	}
 
 	.header-row {
