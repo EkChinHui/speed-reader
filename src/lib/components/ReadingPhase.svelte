@@ -435,7 +435,7 @@
 		border-radius: 50%;
 		border: none;
 		background: var(--accent);
-		color: white;
+		color: #1a1a1e;
 		cursor: pointer;
 		display: flex;
 		align-items: center;

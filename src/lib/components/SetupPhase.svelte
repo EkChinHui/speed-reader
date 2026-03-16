@@ -222,7 +222,7 @@
 		font-weight: 700;
 		letter-spacing: -0.03em;
 		margin: 0;
-		background: linear-gradient(135deg, var(--accent), #818cf8);
+		background: linear-gradient(135deg, var(--accent), #fbbf24);
 		-webkit-background-clip: text;
 		-webkit-text-fill-color: transparent;
 		background-clip: text;
@@ -416,7 +416,7 @@
 
 	.preset-btn.active {
 		background: var(--accent);
-		color: var(--bg);
+		color: #1a1a1e;
 		border-color: var(--accent);
 	}
 
@@ -446,7 +446,7 @@
 
 	.font-btn.active {
 		background: var(--accent);
-		color: white;
+		color: #1a1a1e;
 		border-color: var(--accent);
 	}
 
@@ -459,20 +459,20 @@
 		padding: 0.9rem 3rem;
 		border: none;
 		border-radius: 12px;
-		background: linear-gradient(135deg, #6366f1, #818cf8);
-		color: white;
+		background: linear-gradient(135deg, var(--accent), #fbbf24);
+		color: #1a1a1e;
 		font-size: 1.1rem;
 		font-weight: 600;
 		cursor: pointer;
 		transition: all 0.2s;
 		letter-spacing: 0.01em;
-		box-shadow: 0 4px 20px rgba(99, 102, 241, 0.25);
+		box-shadow: 0 4px 20px rgba(245, 158, 11, 0.25);
 	}
 
 	.start-btn:hover:not(:disabled) {
 		filter: brightness(1.1);
 		transform: translateY(-1px);
-		box-shadow: 0 6px 28px rgba(99, 102, 241, 0.35);
+		box-shadow: 0 6px 28px rgba(245, 158, 11, 0.35);
 	}
 
 	.start-btn:active:not(:disabled) {

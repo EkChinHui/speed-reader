@@ -37,8 +37,8 @@
 		--text-primary: #f0f0f5;
 		--text-secondary: #9494a8;
 		--text-muted: #5a5a6e;
-		--accent: #6366f1;
-		--accent-glow: rgba(99, 102, 241, 0.15);
+		--accent: #f59e0b;
+		--accent-glow: rgba(245, 158, 11, 0.15);
 	}
 
 	:global([data-theme="light"]) {
@@ -50,8 +50,8 @@
 		--text-primary: #1a1a1e;
 		--text-secondary: #6b6b7a;
 		--text-muted: #9c9ca8;
-		--accent: #6366f1;
-		--accent-glow: rgba(99, 102, 241, 0.1);
+		--accent: #d97706;
+		--accent-glow: rgba(217, 119, 6, 0.12);
 	}
 
 	:global(body) {
