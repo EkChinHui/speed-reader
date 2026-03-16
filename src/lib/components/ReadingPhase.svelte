@@ -124,6 +124,7 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class="reader"
 	class:controls-visible={showControls || isPaused || isFinished || isIdle}
@@ -185,7 +186,7 @@
 
 	<!-- Controls overlay -->
 	<div class="controls">
-		<button class="back-btn" onclick={handleBackClick}>
+		<button class="back-btn" onclick={handleBackClick} aria-label="Back to setup">
 			<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
 				<path d="M12 4L6 10L12 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
 			</svg>
