@@ -29,14 +29,29 @@
 	}
 
 	:global(:root) {
-		--bg: #0a0a0c;
-		--surface: #141418;
-		--border: #2a2a32;
-		--text-primary: #e8e8ed;
-		--text-secondary: #8888a0;
-		--text-muted: #55556a;
-		--accent: #7c6ff7;
-		--accent-glow: rgba(124, 111, 247, 0.15);
+		--bg: #09090b;
+		--surface: #131316;
+		--surface-raised: #1a1a1f;
+		--border: #27272a;
+		--border-hover: #2e2e33;
+		--text-primary: #f0f0f5;
+		--text-secondary: #9494a8;
+		--text-muted: #5a5a6e;
+		--accent: #6366f1;
+		--accent-glow: rgba(99, 102, 241, 0.15);
+	}
+
+	:global([data-theme="light"]) {
+		--bg: #fafaf9;
+		--surface: #ffffff;
+		--surface-raised: #f4f4f3;
+		--border: #e4e4e2;
+		--border-hover: #d4d4d1;
+		--text-primary: #1a1a1e;
+		--text-secondary: #6b6b7a;
+		--text-muted: #9c9ca8;
+		--accent: #6366f1;
+		--accent-glow: rgba(99, 102, 241, 0.1);
 	}
 
 	:global(body) {
@@ -47,6 +62,7 @@
 		-moz-osx-font-smoothing: grayscale;
 		overflow: hidden;
 		height: 100dvh;
+		transition: background-color 200ms, color 200ms;
 	}
 
 	.app {
