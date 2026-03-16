@@ -10,6 +10,8 @@ Elevate the RSVP Speed Reader UI from functional MVP to polished product. Add li
 
 Theme is applied via `data-theme` attribute on `<html>`. Variables defined on `:root` (dark default) and `[data-theme="light"]`.
 
+**Note:** All dark theme token values below are intentional changes from the current MVP values (e.g., `--bg` changes from `#0a0a0c` to `#09090b`, `--accent` from `#7c6ff7` to `#6366f1`). The new tokens `--surface-raised` and `--border-hover` are additions that don't exist in the current codebase.
+
 **Accent (both themes):** `#6366f1` (indigo-violet), glow opacity adjusted per theme.
 
 **Dark theme (default):**
@@ -44,22 +46,47 @@ Theme is applied via `data-theme` attribute on `<html>`. Variables defined on `:
 
 ### Theme Detection & Persistence
 
-1. On first visit: check `prefers-color-scheme` media query, apply matching theme.
-2. Store user preference in localStorage (alongside existing `rsvp-settings` key).
-3. On subsequent visits: load persisted preference, ignore OS setting.
-4. Toggle: sun/moon icon button, persisted on change.
+1. On first visit (no persisted value): check `prefers-color-scheme` media query, apply matching theme.
+2. Toggle cycles between `'light'` and `'dark'` only — once the user toggles, their explicit choice is persisted.
+3. On subsequent visits: load persisted `'light'` or `'dark'` preference, ignore OS setting.
+4. Toggle: sun/moon icon button, persisted on each change to the existing `rsvp-settings` localStorage key.
 5. Smooth transition: `background-color` and `color` transitions (200ms) on theme switch.
 
 ### State Store Changes
 
-Add `theme` field to `AppState` class and `PersistedSettings` interface. Type: `'light' | 'dark' | 'system'`. Default: `'system'`. The resolved theme (actual `'light'` or `'dark'`) is derived and applied to `document.documentElement.dataset.theme`.
+Add `theme` field to `AppState` class and `PersistedSettings` interface. Type: `'light' | 'dark'`. Default: resolved from `prefers-color-scheme` on first visit (no `'system'` value stored). The value is applied to `document.documentElement.dataset.theme`.
+
+### Flash-Prevention Script (`app.html`)
+
+Add an inline `<script>` in `<head>` before `%sveltekit.head%` that:
+1. Reads `rsvp-settings` from localStorage, parses JSON, extracts `theme` field.
+2. If found and valid (`'light'` or `'dark'`), sets `document.documentElement.dataset.theme` to that value.
+3. If not found, checks `window.matchMedia('(prefers-color-scheme: light)').matches` — if true, sets `'light'`; otherwise sets `'dark'`.
+4. This runs synchronously before first paint to prevent theme flash.
+
+```html
+<script>
+  (function() {
+    try {
+      var s = JSON.parse(localStorage.getItem('rsvp-settings'));
+      if (s && (s.theme === 'light' || s.theme === 'dark')) {
+        document.documentElement.dataset.theme = s.theme;
+        return;
+      }
+    } catch(e) {}
+    if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+      document.documentElement.dataset.theme = 'light';
+    }
+  })();
+</script>
+```
 
 ## Setup Phase Polish
 
 ### Header
 
 - Title: subtle CSS gradient text effect (`background-clip: text`) using accent color range.
-- Theme toggle: small circular button positioned top-right of the setup container (not absolute to viewport). Animated sun/moon icon swap via CSS rotation (300ms) + opacity crossfade.
+- Theme toggle: 36px circular button positioned top-right of the setup container (not absolute to viewport). Background: `var(--surface)`, border: `1px solid var(--border)`, color: `var(--text-secondary)`. Hover: `border-color: var(--border-hover)`, `color: var(--text-primary)`. Contains inline SVG sun/moon icons, animated swap via CSS rotation (300ms) + opacity crossfade.
 
 ### Textarea
 
@@ -114,7 +141,7 @@ Minimal changes only. Zero animation during word playback.
 
 ### Controls Overlay
 
-- Glassmorphism: `backdrop-filter: blur(12px)` + `background: var(--surface)/80%` (alpha channel).
+- Glassmorphism: `backdrop-filter: blur(12px)` + `background: color-mix(in srgb, var(--surface) 80%, transparent)`.
 - Play button: soft `box-shadow: 0 0 16px var(--accent-glow)`.
 - Back/speed buttons: same glass background treatment.
 - Hover states: subtle scale(1.05) + shadow lift.
@@ -133,7 +160,7 @@ Minimal changes only. Zero animation during word playback.
 | Theme toggle icon | Rotation + opacity crossfade | 300ms |
 | Button hover (all) | scale(1.02-1.05) + shadow | 150ms |
 | Stats appearing | Staggered fade-in | 300ms + 50ms/item |
-| Start button enabled | Subtle glow pulse (CSS) | 2s loop |
+| Start button enabled | Static glow shadow (no pulse — the glow defined in Start Button section is always-on when enabled, not animated) | N/A |
 | Config sections | Fade-in on mount | 400ms |
 
 ### Forbidden (Reading Phase)
@@ -145,8 +172,8 @@ Minimal changes only. Zero animation during word playback.
 
 ## Global Refinements
 
-- Border-radius scale: 8px (small buttons) → 12px (inputs, medium) → 14-16px (containers, textarea).
-- Google Fonts: add `&display=swap` to URL for `font-display: swap`.
+- Border-radius scale: 8px (small buttons) → 12px (medium elements) → 14px (textarea, major containers).
+- Google Fonts: `display=swap` already present in URL (no change needed).
 - Smooth theme transition: `transition: background-color 200ms, color 200ms` on `body` and key containers.
 - Two surface tiers (`--surface`, `--surface-raised`) for visual hierarchy.
 
@@ -156,7 +183,7 @@ Minimal changes only. Zero animation during word playback.
 2. `src/lib/stores/app-state.svelte.ts` — add theme state, persistence, OS detection.
 3. `src/lib/components/SetupPhase.svelte` — all setup phase polish, theme toggle button.
 4. `src/lib/components/ReadingPhase.svelte` — reading phase polish (minimal).
-5. `src/app.html` — add inline script for flash-prevention (set `data-theme` before render).
+5. `src/app.html` — add inline flash-prevention script in `<head>` (see "Flash-Prevention Script" section for exact code).
 
 ## Out of Scope
 
