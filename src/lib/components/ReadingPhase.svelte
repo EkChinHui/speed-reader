@@ -19,6 +19,7 @@
 	let totalWords = $state(0);
 	let engine: RSVPEngine;
 	let containerEl: HTMLDivElement | undefined = $state();
+	let startTimer: ReturnType<typeof setTimeout> | null = null;
 
 	let isPaused = $derived(engineState === 'paused');
 	let isPlaying = $derived(engineState === 'playing');
@@ -54,11 +55,14 @@
 		wpm = appState.wpm;
 
 		// Auto-start after a brief pause for the transition
-		const startTimer = setTimeout(() => engine.play(), 800);
+		startTimer = setTimeout(() => {
+			startTimer = null;
+			engine.play();
+		}, 800);
 
 		return () => {
 			engine.destroy();
-			clearTimeout(startTimer);
+			if (startTimer) clearTimeout(startTimer);
 			if (controlsTimeout) clearTimeout(controlsTimeout);
 		};
 	});
@@ -79,10 +83,18 @@
 		}
 	}
 
+	function cancelAutoStart() {
+		if (startTimer) {
+			clearTimeout(startTimer);
+			startTimer = null;
+		}
+	}
+
 	function handleKeydown(e: KeyboardEvent) {
 		switch (e.code) {
 			case 'Space':
 				e.preventDefault();
+				cancelAutoStart();
 				engine.toggle();
 				break;
 			case 'ArrowUp':

@@ -17,6 +17,8 @@
 	let zenTextareaEl: HTMLTextAreaElement | undefined = $state();
 	let showInfo = $state(false);
 	let zenMode = $state(false);
+	let zenVisible = $state(false);
+	let zenMounted = $state(false);
 
 	let cleaned = $derived(cleanText(appState.rawText));
 	let words = $derived(wordCount(cleaned));
@@ -30,10 +32,16 @@
 	}
 
 	function openZen() {
+		zenMounted = true;
+		// Trigger enter transition on next frame
+		requestAnimationFrame(() => {
+			zenVisible = true;
+		});
 		zenMode = true;
 	}
 
 	function closeZen() {
+		zenVisible = false;
 		zenMode = false;
 	}
 
@@ -190,9 +198,16 @@
 		{/if}
 	</div>
 
-	{#if zenMode}
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<div class="zen-overlay" onkeydown={handleZenKeydown}>
+	{#if zenMounted}
+		<div
+			class="zen-overlay"
+			class:zen-active={zenVisible}
+			ontransitionend={(e) => {
+				if (e.propertyName === 'opacity' && !zenVisible) {
+					zenMounted = false;
+				}
+			}}
+		>
 			<div class="zen-topbar">
 				<button class="zen-close" onclick={closeZen}>
 					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -208,6 +223,7 @@
 				bind:value={appState.rawText}
 				class="zen-textarea"
 				placeholder="Paste or type your text..."
+				onkeydown={handleZenKeydown}
 			></textarea>
 		</div>
 	{/if}
@@ -217,6 +233,7 @@
 			Start Reading
 		</button>
 		<p class="keyboard-hint">space pause · arrows speed · esc exit</p>
+		<a class="built-by" href="https://www.ekchinhui.com/" target="_blank" rel="noopener noreferrer">built by ek chin hui</a>
 	</div>
 </div>
 
@@ -441,8 +458,9 @@
 		border-radius: 14px;
 		background: var(--surface);
 		color: var(--text-primary);
-		font-size: 0.95rem;
-		font-family: inherit;
+		font-size: 0.9rem;
+		font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace;
+		line-height: 1.7;
 		resize: none;
 		min-height: 120px;
 		transition: border-color 0.2s, box-shadow 0.2s, background-color 200ms, color 200ms, min-height 350ms ease;
@@ -494,17 +512,17 @@
 		z-index: 50;
 		display: flex;
 		flex-direction: column;
-		padding: 1.5rem;
-		animation: zenFadeIn 300ms ease both;
+		padding: 3rem 2rem;
+		opacity: 0;
+		transform: scale(1.03);
+		transition: opacity 300ms ease, transform 300ms ease;
+		pointer-events: none;
 	}
 
-	@keyframes zenFadeIn {
-		from {
-			opacity: 0;
-		}
-		to {
-			opacity: 1;
-		}
+	.zen-overlay.zen-active {
+		opacity: 1;
+		transform: scale(1);
+		pointer-events: auto;
 	}
 
 	.zen-topbar {
@@ -686,5 +704,19 @@
 		font-size: 0.7rem;
 		color: var(--text-muted);
 		letter-spacing: 0.03em;
+	}
+
+	.built-by {
+		font-size: 0.65rem;
+		color: var(--text-muted);
+		text-decoration: none;
+		opacity: 0.6;
+		transition: opacity 0.2s;
+		letter-spacing: 0.02em;
+	}
+
+	.built-by:hover {
+		opacity: 1;
+		color: var(--accent);
 	}
 </style>

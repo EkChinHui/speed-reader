@@ -57,6 +57,7 @@ export class RSVPEngine {
 
 	play() {
 		if (this.words.length === 0) return;
+		this.clearTimeout();
 		if (this.state === 'finished') {
 			this.currentIndex = 0;
 		}
